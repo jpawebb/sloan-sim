@@ -1,3 +1,5 @@
+"""Unit tests for the core loan engine logic, including interest calculations and user-loan interactions."""
+
 from core.loan_engine import (
     User,
     UsersLoanProduct,
@@ -15,6 +17,7 @@ import pytest
 # Helper fixture to create a default loan setup
 @pytest.fixture
 def base_loan_args():
+    """Represent a base test loan."""
     return {
         "loan_id": "plan_2",
         "earning_threshold": 27295,
@@ -26,6 +29,7 @@ def base_loan_args():
 
 
 def test_user_loan_linking():
+    """Test the link between User and their Loans."""
     user = User("user_1", 30000)
     loan = UsersLoanProduct(
         user=user,
@@ -70,6 +74,7 @@ def test_user_loan_linking():
     ],
 )
 def test_plan_2_interest_logic(income, expected_rate, base_loan_args):
+    """Test the interest logic for Plan 2 loans across different income levels."""
     user = User("test_user", income)
     loan = UsersLoanProduct(user=user, **base_loan_args)
 
@@ -77,6 +82,7 @@ def test_plan_2_interest_logic(income, expected_rate, base_loan_args):
 
 
 def test_plan_3_interest_logic(base_loan_args):
+    """Test the interest logic for Plan 3 loans."""
     user = User("high_earner", 100_000)
     base_loan_args["loan_id"] = "plan_3"
     loan = UsersLoanProduct(user=user, **base_loan_args)
@@ -87,6 +93,7 @@ def test_plan_3_interest_logic(base_loan_args):
 
 
 def test_plan_1_interest_logic(base_loan_args):
+    """Test the interest logic for Plan 1 loans."""
     user = User("any_income", 25000)
     base_loan_args["loan_id"] = "plan_1"
     loan = UsersLoanProduct(user=user, **base_loan_args)
