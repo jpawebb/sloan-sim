@@ -87,6 +87,17 @@ class UsersLoanProduct(LoanProduct):
     def effective_interest_rate(self) -> float:
         """The effective interest rate applied to the user's loan balance, which can be different from the nominal interest rate defined in the loan product, due to various caps and adjustments based on the user's income and loan type."""
 
+        # Ensure loan_id is valid
+        if self.loan_id not in [
+            "plan_1",
+            "plan_2",
+            "plan_3",
+            "plan_4",
+            "plan_5",
+            "postgraduate",
+        ]:
+            raise ValueError(f"Unknown loan_id: {self.loan_id}")
+
         effective_ceiling = min(PREVAILING_MARKET_RATE_CAP, EMERGENCY_POLICY_CAP)
 
         if self.loan_id == "plan_1" or self.loan_id == "plan_4":
