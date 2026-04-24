@@ -198,7 +198,7 @@ tests/
 
 ### v0.4 - CLI & docs
 - [ ] `typer` CLI per §4.3.
-- [ ] README rewrit, `docs/` site, worked examples per plan.
+- [ ] README rewrite, `docs/` site, worked examples per plan.
 - [ ] Coverage badge, ruff/mypy in CI.
 
 ### v1.0 - Dashboard
