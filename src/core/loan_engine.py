@@ -28,11 +28,6 @@ class InterestApplicationWindow(Enum):
     ANNUALLY = "annually"
 
 
-class VariableInterestRate:
-    def __init__():
-        pass
-
-
 class LoanProduct:
     def __init__(
         self,
