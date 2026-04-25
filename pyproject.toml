@@ -10,3 +10,11 @@ dependencies = [
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.ruff.lint]
+select = ["D"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.11",
+]

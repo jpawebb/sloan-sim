@@ -1,0 +1,44 @@
+name: UV Run Pytest
+run-name: ${{ github.actor }} is running CI with UV
+on: [push]
+jobs:
+  # Linting with ruff
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+            enable-cache: true
+            python-version: "3.10"
+        
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Ruff Check
+        # runs ruff, fails if there are violations
+        run: uv run ruff check .
+      
+      - name: Run Ruff Format
+        # runs ruff format check 
+        run: uv run ruff format --check .
+
+  # Testing with Pytest
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+            enable-cache: true
+            python-version: "3.10"
+        
+      - name: Install dependencies
+        run: uv sync --frozen
+        
+      - name: Run Pytest 
+        run: uv run pytest tests/

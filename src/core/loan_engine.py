@@ -1,3 +1,5 @@
+"""Core loan engine for calculating effective interest rates and repayment schedules for Student Loan Company (SLC) loans."""
+
 from __future__ import annotations
 from enum import Enum
 from typing import List
@@ -21,14 +23,17 @@ PLAN_TWO_LOWER_INTEREST_THRESHOLD = 29385
 PLAN_TWO_UPPER_INTEREST_THRESHOLD = 52885
 
 
-class InterestApplicationWindow(Enum):
-    DAILY = "daily"
-    WEEKLY = "weekly"
-    MONTHLY = "monthly"
-    ANNUALLY = "annually"
-
-
 class LoanProduct:
+    """The structured loan product offered by Student Loan Company (SLC).
+
+    Args:
+        loan_id (str): Internal name for the loan product, e.g. "plan_2"
+        earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
+        payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
+        interest_application_window (InterestApplicationWindow): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
+
+    """
+
     def __init__(
         self,
         loan_id: str,
@@ -36,14 +41,7 @@ class LoanProduct:
         payment_term_years: int,
         interest_application_window: InterestApplicationWindow,
     ):
-        """The structured loan product offered by Student Loan Company (SLC).
-
-        Args:
-            loan_id (str): Internal name for the loan product, e.g. "plan_2"
-            earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
-            payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
-            interest_application_window (InterestApplicationWindow): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
-        """
+        """Represent a structured loan product offered by Student Loan Company (SLC)."""
         self.loan_id = loan_id
         self.earning_threshold = earning_threshold
         self.payment_term_years = payment_term_years
@@ -51,7 +49,19 @@ class LoanProduct:
 
 
 class UsersLoanProduct(LoanProduct):
-    # Inherits from LoanProduct, but with additional user-specific attributes, e.g. loan balance and years since graduation
+    """The user's specific loan product, with additional attributes to calculate the effective interest rate and repayment schedule.
+
+    Args:
+        user (User): The user associated with this loan product, e.g. "user_1"
+        loan_id (str): Internal name for the loan product, e.g. "plan_2"
+        earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
+        payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
+        interest_application_window (InterestApplicationWindow): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
+        balance (float): The user's current outstanding loan balance, e.g. 45000
+        years_since_graduation (int): The number of years since the user graduated. This can be used to determine how long the user has been repaying their loan, and how many years they have left until their loan is forgiven, e.g. 5
+
+    """
+
     def __init__(
         self,
         user: User,
@@ -62,17 +72,7 @@ class UsersLoanProduct(LoanProduct):
         balance: float,
         years_since_graduation: int,
     ):
-        """The user's specific loan product, with additional attributes to calculate the effective interest rate and repayment schedule.
-
-        Args:
-            user (User): The user associated with this loan product, e.g. "user_1"
-            loan_id (str): Internal name for the loan product, e.g. "plan_2"
-            earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
-            payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
-            interest_application_window (InterestApplicationWindow): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
-            balance (float): The user's current outstanding loan balance, e.g. 45000
-            years_since_graduation (int): The number of years since the user graduated. This can be used to determine how long the user has been repaying their loan, and how many years they have left until their loan is forgiven, e.g. 5
-        """
+        """Inherits from LoanProduct, but with additional user-specific attributes, e.g. loan balance and years since graduation."""
         super().__init__(
             loan_id,
             earning_threshold,
@@ -84,70 +84,30 @@ class UsersLoanProduct(LoanProduct):
         self.years_since_graduation = years_since_graduation
 
     @property
-    def effective_interest_rate(self) -> float:
-        """The effective interest rate applied to the user's loan balance, which can be different from the nominal interest rate defined in the loan product, due to various caps and adjustments based on the user's income and loan type."""
+    def effective_interest_rate(self) -> Decimal:
+        """Calculate the effective interest rate for this user's loan product."""
+        from core.plans import get_plan
 
-        # Ensure loan_id is valid
-        if self.loan_id not in [
-            "plan_1",
-            "plan_2",
-            "plan_3",
-            "plan_4",
-            "plan_5",
-            "postgraduate",
-        ]:
-            raise ValueError(f"Unknown loan_id: {self.loan_id}")
-
-        effective_ceiling = min(PREVAILING_MARKET_RATE_CAP, EMERGENCY_POLICY_CAP)
-
-        if self.loan_id == "plan_1" or self.loan_id == "plan_4":
-            # For plan 1 and plan 4 loans, the effective interest rate is the lower of RPI and the Bank of England (BOE) rate + 1%
-            return min(RPI, BOE_BASE_RATE + 0.01)
-
-        if self.loan_id == "plan_2":
-            # Not to be confused with salary thresholds for repayment, which are different and defined in LoanProduct.earning_threshold
-            # This is for determining the effective interest rate applied to the loan balance, which is capped
-            lower_threshold, upper_threshold = (
-                PLAN_TWO_LOWER_INTEREST_THRESHOLD,
-                PLAN_TWO_UPPER_INTEREST_THRESHOLD,
-            )
-
-            # Minimum rate is RPI, applied to those earning below the lower threshold
-            if self.user.annual_income <= lower_threshold:
-                rate = RPI
-            # Maximum rate is RPI + VIR, applied to those earning above the upper threshold
-            elif self.user.annual_income >= upper_threshold:
-                rate = RPI + PLAN_2_VIR
-            # Intermediate rate is a sliding scale between RPI and RPI + VIR, applied to those earning between the lower and upper thresholds
-            else:
-                ratio = (self.user.annual_income - lower_threshold) / (
-                    upper_threshold - lower_threshold
-                )
-                rate = RPI + (ratio * PLAN_2_VIR)
-            return min(rate, effective_ceiling)
-
-        # These are different names for the exact same loan product
-        if self.loan_id == "plan_3" or self.loan_id == "postgraduate":
-            return min(RPI + 0.03, effective_ceiling)
-
-        if self.loan_id == "plan_5":
-            return min(RPI, PREVAILING_MARKET_RATE_CAP)
+        return get_plan(self.loan_id).effective_interest_rate(self.user)
 
 
 class User:
+    """The user of the SLC loan repayment calculator.
+
+    Args:
+        user_id (str): Internal name for the user, e.g. "user_1"
+        annual_income (float): The user's annual income, e.g. 30000
+        loans (List[UsersLoanProduct]): The user's loan products, e.g. personal plan_2 and postgraduate loans
+
+    """
+
     def __init__(
         self,
         user_id: str,
         annual_income: float,
         loans: List[UsersLoanProduct] = None,
     ):
-        """The user of the SLC loan repayment calculator.
-
-        Args:
-            user_id (str): Internal name for the user, e.g. "user_1"
-            annual_income (float): The user's annual income, e.g. 30000
-            loans (List[UsersLoanProduct]): The user's loan products, e.g. personal plan_2 and postgraduate loans
-        """
+        """Represent the user of the SLC loan repayment calculator."""
         self.user_id = user_id
         self.annual_income = annual_income
         self.loans = loans if loans else []
