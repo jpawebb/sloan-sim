@@ -3,7 +3,6 @@
 from core.loan_engine import (
     User,
     UsersLoanProduct,
-    InterestApplicationWindow,
     PLAN_TWO_LOWER_INTEREST_THRESHOLD,
     RPI,
     BOE_BASE_RATE,
@@ -11,6 +10,7 @@ from core.loan_engine import (
     PLAN_2_VIR,
     PLAN_TWO_UPPER_INTEREST_THRESHOLD,
 )
+from core.plans.base import Frequency
 import pytest
 
 
@@ -22,7 +22,7 @@ def base_loan_args():
         "loan_id": "plan_2",
         "earning_threshold": 27295,
         "payment_term_years": 30,
-        "interest_application_window": InterestApplicationWindow.DAILY,
+        "interest_application_window": Frequency.DAILY,
         "balance": 45000,
         "years_since_graduation": 2,
     }
@@ -37,7 +37,7 @@ def test_user_loan_linking():
             "loan_id": "plan_2",
             "earning_threshold": 29385,
             "payment_term_years": 30,
-            "interest_application_window": InterestApplicationWindow.DAILY,
+            "interest_application_window": Frequency.DAILY,
             "balance": 10000,
             "years_since_graduation": 2,
         },
