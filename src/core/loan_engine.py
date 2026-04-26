@@ -3,6 +3,8 @@
 from __future__ import annotations
 from enum import Enum
 from typing import List
+from decimal import Decimal
+from core.plans.base import Frequency
 
 # Applicable retail price index (RPI) from September 1st, 2025 to 31 August 2026
 RPI = 0.032
@@ -30,7 +32,7 @@ class LoanProduct:
         loan_id (str): Internal name for the loan product, e.g. "plan_2"
         earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
         payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
-        interest_application_window (InterestApplicationWindow): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
+        interest_application_window (Frequency): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
 
     """
 
@@ -39,7 +41,7 @@ class LoanProduct:
         loan_id: str,
         earning_threshold: float,
         payment_term_years: int,
-        interest_application_window: InterestApplicationWindow,
+        interest_application_window: Frequency,
     ):
         """Represent a structured loan product offered by Student Loan Company (SLC)."""
         self.loan_id = loan_id
@@ -56,7 +58,7 @@ class UsersLoanProduct(LoanProduct):
         loan_id (str): Internal name for the loan product, e.g. "plan_2"
         earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
         payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
-        interest_application_window (InterestApplicationWindow): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
+        interest_application_window (Frequency): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
         balance (float): The user's current outstanding loan balance, e.g. 45000
         years_since_graduation (int): The number of years since the user graduated. This can be used to determine how long the user has been repaying their loan, and how many years they have left until their loan is forgiven, e.g. 5
 
@@ -68,7 +70,7 @@ class UsersLoanProduct(LoanProduct):
         loan_id: str,
         earning_threshold: float,
         payment_term_years: int,
-        interest_application_window: InterestApplicationWindow,
+        interest_application_window: Frequency,
         balance: float,
         years_since_graduation: int,
     ):
