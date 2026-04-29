@@ -1,17 +1,19 @@
 """Unit tests for the core loan engine logic, including interest calculations and user-loan interactions."""
 
-from core.loan_engine import (
-    User,
-    UsersLoanProduct,
-    PLAN_TWO_LOWER_INTEREST_THRESHOLD,
-    RPI,
-    BOE_BASE_RATE,
-    PREVAILING_MARKET_RATE_CAP,
-    PLAN_2_VIR,
-    PLAN_TWO_UPPER_INTEREST_THRESHOLD,
-)
-from core.plans.base import Frequency
+from decimal import Decimal
 import pytest
+
+from core.config import ConfigLoader
+from core.loan_engine import User, UsersLoanProduct
+from core.plans.base import Frequency
+
+_cfg = ConfigLoader()
+
+_RPI = _cfg.rpi()
+_BOE = _cfg.boe_base_rate()
+_PMR_CAP = _cfg.prevailing_market_rate_cap()
+_VIR = _cfg.vir_margin("plan_2")
+_P2_LO, _P2_HI = _cfg.interest_thresholds("plan_2")
 
 
 # Helper fixture to create a default loan setup
@@ -20,8 +22,8 @@ def base_loan_args():
     """Represent a base test loan."""
     return {
         "loan_id": "plan_2",
-        "earning_threshold": 27295,
-        "payment_term_years": 30,
+        "earnings_threshold": _cfg.earnings_threshold("plan_2"),
+        "repayment_period": _cfg.repayment_period("plan_2"),
         "interest_application_window": Frequency.DAILY,
         "balance": 45000,
         "years_since_graduation": 2,
@@ -35,8 +37,8 @@ def test_user_loan_linking():
         user=user,
         **{
             "loan_id": "plan_2",
-            "earning_threshold": 29385,
-            "payment_term_years": 30,
+            "earnings_threshold": _cfg.earnings_threshold("plan_2"),
+            "repayment_period": _cfg.repayment_period("plan_2"),
             "interest_application_window": Frequency.DAILY,
             "balance": 10000,
             "years_since_graduation": 2,
@@ -53,24 +55,15 @@ def test_user_loan_linking():
     "income, expected_rate",
     [
         # Below lower threshold: RPI only
-        (PLAN_TWO_LOWER_INTEREST_THRESHOLD - 5000, RPI),
+        (_P2_LO - 5000, _RPI),
         # At lower boundary: RPI only
-        (PLAN_TWO_LOWER_INTEREST_THRESHOLD, RPI),
-        # At upper boundary: RPI + VIR
-        (
-            PLAN_TWO_UPPER_INTEREST_THRESHOLD,
-            min(RPI + PLAN_2_VIR, PREVAILING_MARKET_RATE_CAP),
-        ),
+        (_P2_LO, _RPI),
+        # At upper boundary: RPI + VIR (capped)
+        (_P2_HI, min(_RPI + _VIR, _PMR_CAP)),
         # Above upper boundary: Capped at ceiling (RPI + VIR, but capped by prevailing market rate cap)
-        (
-            PLAN_TWO_UPPER_INTEREST_THRESHOLD + 5000,
-            min(RPI + PLAN_2_VIR, PREVAILING_MARKET_RATE_CAP),
-        ),
+        (_P2_HI + 5000, min(_RPI + _VIR, _PMR_CAP)),
         # Midpoint (RPI + half of VIR)
-        (
-            (PLAN_TWO_LOWER_INTEREST_THRESHOLD + PLAN_TWO_UPPER_INTEREST_THRESHOLD) / 2,
-            RPI + (PLAN_2_VIR / 2),
-        ),
+        ((_P2_LO + _P2_HI) / 2, _RPI + (_VIR / 2)),
     ],
 )
 def test_plan_2_interest_logic(income, expected_rate, base_loan_args):
@@ -88,7 +81,7 @@ def test_plan_3_interest_logic(base_loan_args):
     loan = UsersLoanProduct(user=user, **base_loan_args)
 
     assert loan.effective_interest_rate == pytest.approx(
-        min(RPI + 0.03, PREVAILING_MARKET_RATE_CAP)
+        min(_RPI + Decimal(0.03), _PMR_CAP)
     )
 
 
@@ -98,4 +91,6 @@ def test_plan_1_interest_logic(base_loan_args):
     base_loan_args["loan_id"] = "plan_1"
     loan = UsersLoanProduct(user=user, **base_loan_args)
 
-    assert loan.effective_interest_rate == pytest.approx(min(RPI, BOE_BASE_RATE + 0.01))
+    assert loan.effective_interest_rate == pytest.approx(
+        min(_RPI, _BOE + Decimal(0.01))
+    )

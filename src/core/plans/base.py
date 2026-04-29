@@ -33,8 +33,8 @@ class LoanPlan(ABC):
     Attributes:
         loan_id: Unique identifier for the loan plan.
         aliases: Alternative names for the plan.
-        default_earning_threshold: Minimum income before repayments start.
-        default_payment_term_years: Duration of the loan before write-off.
+        earnings_threshold: Minimum income before repayments start.
+        repayment_period: Duration of the loan before write-off.
         repayment_rate: Percentage of income over the threshold taken for payment.
 
     Example:
@@ -48,10 +48,10 @@ class LoanPlan(ABC):
 
     loan_id: str
     aliases: tuple[str, ...] = ()
-    default_earning_threshold: (
+    earnings_threshold: (
         Decimal  # TODO: these need to stored in a rates.yml or similar, not hardcoded
     )
-    default_payment_term_years: int
+    repayment_period: int
     default_interest_calculation_window: Frequency = Frequency.DAILY
     default_interest_application_window: Frequency = Frequency.MONTHLY
     repayment_rate: Decimal

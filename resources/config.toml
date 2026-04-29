@@ -18,6 +18,7 @@ boe_base_rate = [
 
 # Preemptive protection against interest rate spikes
 prevailing_market_rate_cap = [
+    { date = 2025-09-01, value = 999, end_date = 2026-09-01 }, # Effectively no cap in 2025/26
     { date = 2026-09-01, value = 0.06, end_date = 2027-09-01 }
 ]
 
