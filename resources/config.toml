@@ -1,0 +1,69 @@
+# Versioned Time-Series Condifuration data for SLC Loan Plan Calculations
+# ---
+# Historical earngings thresholds: https://www.gov.uk/guidance/previous-annual-repayment-thresholds
+# Dates are all 'as of', marking the beginning widnow of application of said figures, unless otherwise stated.
+
+
+# Broad macroeconomic indicators, used in interest rate calculations
+[economics]
+rpi = [
+    { date = 2025-09-01, value = 0.032 },
+    { date = 2026-09-01, value = 0.041 }
+]
+
+# Used in effective interest rate calculation for Plans 1 and 4
+boe_base_rate = [
+    { date = 2025-12-18, value = 0.0375 }
+]
+
+# Preemptive protection against interest rate spikes
+prevailing_market_rate_cap = [
+    { date = 2026-09-01, value = 0.06, end_date = 2027-09-01 }
+]
+
+
+# Plan specific configurations
+[plans.plan_1]
+repayment_rate = 0.09
+repayment_period = 25
+earnings_threshold = [
+    { date = 2025-04-06, value = 26065 },
+    { date = 2026-04-06, value = 26900 }
+]
+
+
+[plans.plan_2]
+repayment_rate = 0.09
+repayment_period = 30
+vir_margin = 0.03
+earnings_threshold = [
+    { date = 2025-04-06, value = 28470 },
+    { date = 2026-04-06, value = 29385 }
+]
+interest_thresholds = [
+    { date = 2025-04-06, lower_value = 28470, upper_value = 51245 },
+    { date = 2026-04-06, lower_value = 29385, upper_value = 52885 }
+]
+
+[plans.plan_3]  # Postgraduate loan
+repayment_rate = 0.06
+repayment_period = 30
+earnings_threshold = [
+    { date = 2025-04-06, value = 21000 }
+]
+
+
+[plans.plan_4]
+repayment_rate = 0.09
+repayment_period = 30
+earnings_threshold = [
+    { date = 2025-04-06, value = 32745 },
+    { date = 2026-04-06, value = 33795 }
+]
+
+[plans.plan_5]
+repayment_rate = 0.09
+repayment_period = 40
+earnings_threshold = [
+    { date = 2025-04-06, value = 25000 }
+]

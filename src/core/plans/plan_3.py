@@ -3,11 +3,8 @@
 from decimal import Decimal
 
 from core.plans.base import LoanPlan, Frequency
-from core.loan_engine import (
-    RPI,
-    PREVAILING_MARKET_RATE_CAP,
-    EMERGENCY_POLICY_CAP,
-)  # TODO: move this to a rates.yml
+
+# TODO: Load all figures from config.toml
 
 
 class Plan3(LoanPlan):
@@ -15,6 +12,7 @@ class Plan3(LoanPlan):
 
     loan_id = "plan_3"
     aliases = ("postgraduate",)
+    # TODO: replace with values from config.toml
     default_earning_threshold = 21_000
     default_payment_term = 30
     repayment_rate = 0.06

@@ -6,24 +6,6 @@ from typing import List
 from decimal import Decimal
 from core.plans.base import Frequency
 
-# Applicable retail price index (RPI) from September 1st, 2025 to 31 August 2026
-RPI = 0.032
-
-# Bank rate of the Bank of England (BOE), is used as a boundry for interest rates for plan 1 and plan 4 loans
-BOE_BASE_RATE = 0.0375
-
-# Variable interest rate (VIR) margin is the maximum premium above RPI that can be applied to the loan balance for plan 2.
-# Total cap for plan 2 (RPI + VIR) will be 6% starting September 1st, 2026.
-PLAN_2_VIR = 0.03
-
-# Preemptive incoming cap of 6% September 1st, 2026 for plans 2, 3, and 5
-PREVAILING_MARKET_RATE_CAP = 0.06
-EMERGENCY_POLICY_CAP = 0.06
-
-# Interest rate specific thresholds
-PLAN_TWO_LOWER_INTEREST_THRESHOLD = 29385
-PLAN_TWO_UPPER_INTEREST_THRESHOLD = 52885
-
 
 class LoanProduct:
     """The structured loan product offered by Student Loan Company (SLC).
