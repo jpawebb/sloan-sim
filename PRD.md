@@ -68,7 +68,7 @@ Unline HMRC's "find out how much you'll repay" tool -- which only reports the ne
 3. Allocate repayment across loans per FR-4.
 4. Decrement balance; record a `MonthlyLedgerEntry`.
 5. On each anniversary, apply the user's estimated salary growth rate.
-6. On reaching `payment_term_years` for a given loan, write off the remaining balance and stop accruing on that loan.
+6. On reaching `repayment_period` for a given loan, write off the remaining balance and stop accruing on that loan.
 
 **FR-6. Salary Growth Model**. Support:
 - Constant annual % growth (MVP).
@@ -77,7 +77,7 @@ Unline HMRC's "find out how much you'll repay" tool -- which only reports the ne
 
 **FR-7. Outputs**. A `SimulationResult` containing:
 - Per-loan amortisation table (date, opening balance, interest accrued, repayment applied, closing balance).
-- Aggregate metrics: total interest paid, total repaid, payoff date per loan and overall (plus payoff date per loan and overall if there was no `payment_term_years`), % of original principle recovered by SLC.
+- Aggregate metrics: total interest paid, total repaid, payoff date per loan and overall (plus payoff date per loan and overall if there was no `repayment_period`), % of original principle recovered by SLC.
 
 **FR-8. Voluntary Overpayments**. Optional one-off or recurring extra payments, allocated by user-chosen strategy (`highest_rate_first`, `shortest_term_first`, `pro_rata`).
 

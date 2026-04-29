@@ -2,34 +2,38 @@
 
 from decimal import Decimal
 
-from core.plans.base import LoanPlan, Frequency
+from core.config import ConfigLoader
+from core.plans.base import LoanPlan
 
-# TODO: Load all figures from config.toml
+_cfg = ConfigLoader()
 
 
 class Plan2(LoanPlan):
     """SLC Plan 2 implementation. Earnings threshold has changed from £28,470 in 2025/26 to £29,385 in 2026/27."""
 
     loan_id = "plan_2"
-    # TODO: replace with values from config.toml
-    default_earning_threshold = 29_385
-    default_payment_term = 30
-    repayment_rate = 0.09
+    earnings_threshold = _cfg.earnings_threshold(loan_id)
+    repayment_rate = _cfg.repayment_rate(loan_id)
+    repayment_period = _cfg.repayment_period(loan_id)
 
     def effective_interest_rate(self, user) -> Decimal:
-        """Sliding scale.
+        """Sliding scale between RPI and RPI + VIR margin, capped by prevailing market rate cap.
 
-        Effective rate is calculated based on the borrower's income, with a sliding scale between
-        RPI and RPI + VIR, capped at the prevailing market rate cap and emergency policy cap.
+        - At or below lower threshold: RPI only.
+        - At or above upper threshold: RPI + VIR.
+        - Between the two: linear interpolation.
+        - Always capped at the prevailing market rate cap.
         """
-        ceiling = min(PREVAILING_MARKET_RATE_CAP, EMERGENCY_POLICY_CAP)
-        lo, hi = PLAN_TWO_LOWER_INTEREST_THRESHOLD, PLAN_TWO_UPPER_INTEREST_THRESHOLD
+        rpi = _cfg.rpi()
+        vir = _cfg.vir_margin(self.loan_id)
+        cap = _cfg.prevailing_market_rate_cap()
+        lo, hi = _cfg.interest_thresholds(self.loan_id)
 
         if user.annual_income <= lo:
-            rate = RPI
+            rate = rpi
         elif user.annual_income >= hi:
-            rate = RPI + PLAN_2_VIR
+            rate = rpi + vir
         else:
             ratio = (user.annual_income - lo) / (hi - lo)
-            rate = RPI + (ratio * PLAN_2_VIR)
-        return min(rate, ceiling)
+            rate = rpi + (ratio * vir)
+        return min(rate, cap)

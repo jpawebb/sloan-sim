@@ -12,8 +12,8 @@ class LoanProduct:
 
     Args:
         loan_id (str): Internal name for the loan product, e.g. "plan_2"
-        earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
-        payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
+        earnings_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
+        repayment_period (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
         interest_application_window (Frequency): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
 
     """
@@ -21,14 +21,14 @@ class LoanProduct:
     def __init__(
         self,
         loan_id: str,
-        earning_threshold: float,
-        payment_term_years: int,
+        earnings_threshold: float,
+        repayment_period: int,
         interest_application_window: Frequency,
     ):
         """Represent a structured loan product offered by Student Loan Company (SLC)."""
         self.loan_id = loan_id
-        self.earning_threshold = earning_threshold
-        self.payment_term_years = payment_term_years
+        self.earnings_threshold = earnings_threshold
+        self.repayment_period = repayment_period
         self.interest_application_window = interest_application_window
 
 
@@ -38,8 +38,8 @@ class UsersLoanProduct(LoanProduct):
     Args:
         user (User): The user associated with this loan product, e.g. "user_1"
         loan_id (str): Internal name for the loan product, e.g. "plan_2"
-        earning_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
-        payment_term_years (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
+        earnings_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
+        repayment_period (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
         interest_application_window (Frequency): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
         balance (float): The user's current outstanding loan balance, e.g. 45000
         years_since_graduation (int): The number of years since the user graduated. This can be used to determine how long the user has been repaying their loan, and how many years they have left until their loan is forgiven, e.g. 5
@@ -50,8 +50,8 @@ class UsersLoanProduct(LoanProduct):
         self,
         user: User,
         loan_id: str,
-        earning_threshold: float,
-        payment_term_years: int,
+        earnings_threshold: float,
+        repayment_period: int,
         interest_application_window: Frequency,
         balance: float,
         years_since_graduation: int,
@@ -59,8 +59,8 @@ class UsersLoanProduct(LoanProduct):
         """Inherits from LoanProduct, but with additional user-specific attributes, e.g. loan balance and years since graduation."""
         super().__init__(
             loan_id,
-            earning_threshold,
-            payment_term_years,
+            earnings_threshold,
+            repayment_period,
             interest_application_window,
         )
         self.user = user
