@@ -50,7 +50,7 @@ Unline HMRC's "find out how much you'll repay" tool -- which only reports the ne
 **FR-1. Loan Modelling**. A `LoanProduct` defines plan-level constants (earning threshold, repayment rate, write-off term, interest calculation window, interest application window, intrest rules). A `UsersLoanProduct` attached a balance, a start date (or `years_since_graduate`), and a reference to the borrower.
 
 **FR-2. Effective Interest Rate**. Per plan, must implenent:
-- **Plan 1 & Plan 4**: `min(RPI + 3%, PMR cap)`.
+- **Plan 1 & Plan 4**: `min(RPI, BOE base rate + 1%)`.
 - **Plan 2**: Sliding scale between RPI (≤ lower threshold) and RPI + 3% (≥ upper threshold), capped by the Prevailing Market Rate (currently 6%).
 - **Plan 3 / Postgraduate**: `min(RPI + 3%, PMR cap)`.
 - **Plan 5**: `min(RPI, PMR cap)`

@@ -3,13 +3,15 @@
 from decimal import Decimal
 
 from core.plans.base import LoanPlan, Frequency
-from core.loan_engine import RPI, BOE_BASE_RATE  # TODO: move this to a rates.yml
+
+# TODO: Load all figures from config.toml
 
 
 class Plan1(LoanPlan):
     """SLC Plan 1 implementation. Earnings threshold has changed from £26,065 in 2025/26 to £26,900 in 2026/27."""
 
     loan_id = "plan_1"
+    # TODO: replace with values from config.toml
     default_earning_threshold = 26_900
     default_payment_term = 25
     repayment_rate = 0.09
