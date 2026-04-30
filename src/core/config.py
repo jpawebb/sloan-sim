@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import sys
 from datetime import date
 from decimal import Decimal
@@ -10,6 +11,8 @@ if sys.version_info >= (3, 11):
     import tomllib
 else:
     import tomli as tomllib
+
+_CONFIG_PATH = Path(__file__).parent.parent.parent / "resources" / "config.toml"
 
 
 def _resolve_as_of(series: list[dict], as_of: date) -> dict:
@@ -23,8 +26,6 @@ def _resolve_as_of(series: list[dict], as_of: date) -> dict:
         ValueError: If no entry exists on or before `as_of`.
 
     """
-    print(f"As of: {type(as_of)} - {as_of}")
-    print([e for e in series[0]])
     eligible = [entry for entry in series if entry["date"] <= as_of]
     if not eligible:
         raise ValueError(
@@ -62,7 +63,7 @@ class ConfigLoader:
         """
         if cls._instance is None:
             instance = super().__new__(cls)
-            with open("resources/config.toml", "rb") as f:
+            with open(_CONFIG_PATH, "rb") as f:
                 instance._data = tomllib.load(f)
             cls._instance = instance
         return cls._instance

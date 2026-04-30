@@ -48,9 +48,7 @@ class LoanPlan(ABC):
 
     loan_id: str
     aliases: tuple[str, ...] = ()
-    earnings_threshold: (
-        Decimal  # TODO: these need to stored in a rates.yml or similar, not hardcoded
-    )
+    earnings_threshold: Decimal
     repayment_period: int
     default_interest_calculation_window: Frequency = Frequency.DAILY
     default_interest_application_window: Frequency = Frequency.MONTHLY

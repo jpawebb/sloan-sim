@@ -94,3 +94,23 @@ def test_plan_1_interest_logic(base_loan_args):
     assert loan.effective_interest_rate == pytest.approx(
         min(_RPI, _BOE + Decimal(0.01))
     )
+
+
+def test_plan_4_interest_logic(base_loan_args):
+    """Test the interest logic for Plan 4 loans."""
+    user = User("any_income", 25000)
+    base_loan_args["loan_id"] = "plan_4"
+    loan = UsersLoanProduct(user=user, **base_loan_args)
+
+    assert loan.effective_interest_rate == pytest.approx(
+        min(_RPI, _BOE + Decimal(0.01))
+    )
+
+
+def test_plan_5_interest_logic(base_loan_args):
+    """Test the interest logic for Plan 5 loans."""
+    user = User("any_income", 25000)
+    base_loan_args["loan_id"] = "plan_5"
+    loan = UsersLoanProduct(user=user, **base_loan_args)
+
+    assert loan.effective_interest_rate == pytest.approx(min(_RPI, _PMR_CAP))
