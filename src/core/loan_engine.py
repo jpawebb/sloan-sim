@@ -12,7 +12,7 @@ class LoanProduct:
 
     Args:
         loan_id (str): Internal name for the loan product, e.g. "plan_2"
-        earnings_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
+        earnings_threshold (Decimal): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
         repayment_period (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
         interest_application_window (Frequency): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
 
@@ -21,7 +21,7 @@ class LoanProduct:
     def __init__(
         self,
         loan_id: str,
-        earnings_threshold: float,
+        earnings_threshold: Decimal,
         repayment_period: int,
         interest_application_window: Frequency,
     ):
@@ -38,10 +38,10 @@ class UsersLoanProduct(LoanProduct):
     Args:
         user (User): The user associated with this loan product, e.g. "user_1"
         loan_id (str): Internal name for the loan product, e.g. "plan_2"
-        earnings_threshold (float): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
+        earnings_threshold (Decimal): Debtors earning threshold, above which payment is required, e.g. 27295 for plan_2
         repayment_period (int): Lifetime of the loan, after which it is forgiven, e.g. 30 for plan_2
         interest_application_window (Frequency): How often is the annualised interest rate applied to the loan balance, e.g. "daily"
-        balance (float): The user's current outstanding loan balance, e.g. 45000
+        balance (Decimal): The user's current outstanding loan balance, e.g. 45000
         years_since_graduation (int): The number of years since the user graduated. This can be used to determine how long the user has been repaying their loan, and how many years they have left until their loan is forgiven, e.g. 5
 
     """
@@ -50,10 +50,10 @@ class UsersLoanProduct(LoanProduct):
         self,
         user: User,
         loan_id: str,
-        earnings_threshold: float,
+        earnings_threshold: Decimal,
         repayment_period: int,
         interest_application_window: Frequency,
-        balance: float,
+        balance: Decimal,
         years_since_graduation: int,
     ):
         """Inherits from LoanProduct, but with additional user-specific attributes, e.g. loan balance and years since graduation."""
@@ -80,7 +80,7 @@ class User:
 
     Args:
         user_id (str): Internal name for the user, e.g. "user_1"
-        annual_income (float): The user's annual income, e.g. 30000
+        annual_income (Decimal): The user's annual income, e.g. 30000
         loans (List[UsersLoanProduct]): The user's loan products, e.g. personal plan_2 and postgraduate loans
 
     """
@@ -88,7 +88,7 @@ class User:
     def __init__(
         self,
         user_id: str,
-        annual_income: float,
+        annual_income: Decimal,
         loans: List[UsersLoanProduct] = None,
     ):
         """Represent the user of the SLC loan repayment calculator."""
