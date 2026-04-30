@@ -6,3 +6,9 @@ htmlcov/
 # Python artifacts
 __pycache__/
 *.py[cod]
+
+# Build artifacts
+*.egg-info/
+*.egg/
+dist/
+build/
