@@ -9,10 +9,10 @@ from typing import Dict, List
 
 import pandas as pd
 
-from config import ConfigLoader
-from loan_engine import User, UsersLoanProduct
-from models import LoanSimulation, MonthlyLedgerEntry, SimulationResult
-from plans import get_plan
+from .config import ConfigLoader
+from .loan_engine import User, UsersLoanProduct
+from .models import LoanSimulation, MonthlyLedgerEntry, SimulationResult
+from .plans import get_plan
 
 _cfg = ConfigLoader()
 

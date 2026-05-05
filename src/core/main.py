@@ -8,10 +8,10 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from calculations import freedom
-from config import ConfigLoader
-from loan_engine import User, UsersLoanProduct, Frequency
-from simulation_engine import simulate
+from .calculations import freedom
+from .config import ConfigLoader
+from .loan_engine import User, UsersLoanProduct, Frequency
+from .simulation_engine import simulate
 
 _cfg = ConfigLoader()
 

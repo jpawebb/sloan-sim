@@ -2,8 +2,8 @@
 
 from decimal import Decimal
 
-from config import ConfigLoader
-from plans.base import LoanPlan
+from src.core.config import ConfigLoader
+from .base import LoanPlan
 
 _cfg = ConfigLoader()
 
