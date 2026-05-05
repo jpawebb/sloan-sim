@@ -1,11 +1,11 @@
 """Module for instantiating and managing loan plans."""
 
-from core.plans.base import LoanPlan
-from core.plans.plan_1 import Plan1
-from core.plans.plan_2 import Plan2
-from core.plans.plan_3 import Plan3
-from core.plans.plan_4 import Plan4
-from core.plans.plan_5 import Plan5
+from plans.base import LoanPlan
+from plans.plan_1 import Plan1
+from plans.plan_2 import Plan2
+from plans.plan_3 import Plan3
+from plans.plan_4 import Plan4
+from plans.plan_5 import Plan5
 
 
 def _build_registry() -> dict[str, LoanPlan]:
