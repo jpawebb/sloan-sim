@@ -39,7 +39,7 @@ with st.sidebar:
 
     # Generate dynamic inputs
     for i in range(st.session_state.loan_count):
-        with st.expander(f"Loan #{i+1}", expanded=True):
+        with st.expander(f"Loan #{i + 1}", expanded=True):
             l_id = st.selectbox(
                 "Plan Type",
                 options=["plan_1", "plan_2", "plan_3", "plan_4", "plan_5", "postgrad"],
@@ -62,7 +62,6 @@ with st.sidebar:
     st.divider()
 
 if st.button("Run Full Simulation", type="primary"):
-
     USER = User(user_name, annual_income=annual_income)
 
     try:
