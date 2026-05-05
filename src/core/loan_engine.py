@@ -4,7 +4,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List
 from decimal import Decimal
-from core.plans.base import Frequency
+from .plans.base import Frequency
 
 
 class LoanProduct:
@@ -70,7 +70,7 @@ class UsersLoanProduct(LoanProduct):
     @property
     def effective_interest_rate(self) -> Decimal:
         """Calculate the effective interest rate for this user's loan product."""
-        from core.plans import get_plan
+        from .plans import get_plan
 
         return get_plan(self.loan_id).effective_interest_rate(self.user)
 

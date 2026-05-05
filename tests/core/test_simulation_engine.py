@@ -5,10 +5,10 @@ from decimal import Decimal
 
 import pytest
 
-from core.config import ConfigLoader
-from core.simulation_engine import simulate
-from core.loan_engine import User, UsersLoanProduct
-from core.plans.base import Frequency
+from src.core.config import ConfigLoader
+from src.core.simulation_engine import simulate
+from src.core.loan_engine import User, UsersLoanProduct
+from src.core.plans.base import Frequency
 
 _cfg = ConfigLoader()
 

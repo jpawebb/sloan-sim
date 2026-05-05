@@ -5,11 +5,14 @@ description = "Student loan repayment simulator UK"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "pandas>=2.3.3",
+    "plotly[express]>=6.7.0",
+    "streamlit>=1.57.0",
     "tomli>=2.0; python_version < '3.11'",
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]
 
 [tool.ruff.lint]
 select = ["D"]
