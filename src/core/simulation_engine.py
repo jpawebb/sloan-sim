@@ -7,10 +7,12 @@ from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, List
 
-from core.config import ConfigLoader
-from core.loan_engine import User, UsersLoanProduct
-from core.models import LoanSimulation, MonthlyLedgerEntry, SimulationResult
-from core.plans import get_plan
+import pandas as pd
+
+from config import ConfigLoader
+from loan_engine import User, UsersLoanProduct
+from models import LoanSimulation, MonthlyLedgerEntry, SimulationResult
+from plans import get_plan
 
 _cfg = ConfigLoader()
 
@@ -69,11 +71,38 @@ def _resolve_growth(salary_growth: Decimal | List[Decimal], year_index: int) -> 
     return Decimal(str(salary_growth))
 
 
+def _simulation_to_dataframe(simulation: SimulationResult) -> pd.DataFrame:
+    """Transform the output of ``simulate`` to a user-friendly data frame."""
+    rows = []
+
+    for loan_id, sim in simulation.loans.items():
+        for entry in sim.ledger:
+            row = {
+                "loan_id": loan_id,
+                "month": entry.month,
+                "opening_balance": entry.opening_balance,
+                "interest_accrued": entry.interest_accrued,
+                "repayment_applied": entry.repayment_applied,
+                "closing_balance": entry.closing_balance,
+                "is_written_off": entry.written_off,
+            }
+            rows.append(row)
+
+    df = pd.DataFrame(rows)
+
+    # Ensure date objects are actual datetime types for easier plotting
+    if not df.empty:
+        df["month"] = pd.to_datetime(df["month"])
+
+    return df
+
+
 def simulate(
     user: User,
     start_date: date,
     salary_growth: Decimal | List(Decimal) = Decimal(0),
-) -> SimulationResult:
+    to_df: bool = False,
+) -> SimulationResult | pd.DataFrame:
     """Run a month-by-month simulation of the user's student loan repayments.
 
     Args:
@@ -84,10 +113,11 @@ def simulate(
         salary_growth: Annual salary growth rate as a single Decimal (e.g. 0.03 for 3% growth) or a list
             of per-year rates where index 0 applies afetr the first anniversary of the ``start_date``.
             Defaults to ``0.0`` (flat salary).
+        to_df: Boolean flag to send output to a pandas dataframe. False by default.
 
     Returns:
         A ``SimulationResult`` containing a per-loan ``LoanSimulation`` (with full monthly ledger)
-        plus aggregate metrics.
+        plus aggregate metrics, or that same result as a pandas dataframe.
 
     Raises:
         ValueError: If ``user.loans`` is empty.
@@ -240,4 +270,7 @@ def simulate(
 
         current_date = next_date
 
-    return SimulationResult(loans=simulations)
+    if to_df:
+        return _simulation_to_dataframe(SimulationResult(loans=simulations))
+    else:
+        return SimulationResult(loans=simulations)

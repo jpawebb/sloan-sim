@@ -4,7 +4,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List
 from decimal import Decimal
-from core.plans.base import Frequency
+from plans.base import Frequency
 
 
 class LoanProduct:
