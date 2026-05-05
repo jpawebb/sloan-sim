@@ -16,7 +16,6 @@ _cfg = ConfigLoader()
 
 
 if __name__ == "__main__":
-
     USER = User(
         "james",
         annual_income=50_000,
