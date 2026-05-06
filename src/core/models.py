@@ -62,6 +62,24 @@ class LoanSimulation:
         return None
 
     @property
+    def cost_ratio(self) -> Decimal:
+        """The ratio of total interest to the original balance.
+
+        Shows how 'expensive' the debt was (e.g., 0.5 means you paid 50% extra in interest).
+        """
+        if not self.ledger:
+            return Decimal(0)
+        original_balance = self.ledger[0].opening_balance
+        if original_balance <= 0:
+            return Decimal(0)
+        return (self.total_interest_paid / original_balance).quantize(Decimal("0.0001"))
+
+    @property
+    def is_fully_repaid(self) -> bool:
+        """True if the loan was paid off by the user; False if it was written off."""
+        return any(e.closing_balance <= 0 and not e.written_off for e in self.ledger)
+
+    @property
     def written_off_amount(self) -> Decimal:
         """Balance forgiven at write-off, or zero if loan was fully repaid."""
         for entry in self.ledger:
@@ -72,6 +90,13 @@ class LoanSimulation:
                     - entry.repayment_applied
                 )
         return Decimal(0)
+
+    @property
+    def resolution_status(self) -> str:
+        """Human-readable final state of the loan."""
+        if not self.ledger or self.ledger[-1].closing_balance > 0:
+            return "Active"
+        return "Written Off" if any(e.written_off for e in self.ledger) else "Paid Off"
 
 
 @dataclass
@@ -105,3 +130,51 @@ class SimulationResult:
         if any(d is None for d in dates):
             return None
         return max(dates)
+
+    @property
+    def total_written_off(self) -> Decimal:
+        """Sum of all balances forgiven across all loans."""
+        return sum((s.written_off_amount for s in self.loans.values()), Decimal(0))
+
+    @property
+    def weighted_interest_rate_impact(self) -> Decimal:
+        """Total interest paid as a percentage of total principal repaid.
+
+        Useful for showing the 'real' cost of the borrowing bundle.
+        """
+        if self.total_repaid == 0:
+            return Decimal(0)
+        return (self.total_interest_paid / self.total_repaid).quantize(
+            Decimal("0.0001")
+        )
+
+    @property
+    def peak_debt(self) -> Decimal:
+        """The highest combined balance at any point in the simulation."""
+        # Find all unique months across all loans
+        all_months = sorted({e.month for s in self.loans.values() for e in s.ledger})
+
+        max_total = Decimal(0)
+        for m in all_months:
+            month_total = sum(
+                next((e.opening_balance for e in s.ledger if e.month == m), Decimal(0))
+                for s in self.loans.values()
+            )
+            max_total = max(max_total, month_total)
+        return max_total
+
+    def get_summary_table(self) -> List[Dict]:
+        """Generate a clean list of dicts for pd.DataFrame or st.table consumption."""
+        return [
+            {
+                "Loan": lid,
+                "Status": sim.resolution_status,
+                "Total Repaid": sim.total_repaid,
+                "Total Interest": sim.total_interest_paid,
+                "Written Off": sim.written_off_amount,
+                "Freedom Date": (
+                    sim.payoff_date.strftime("%Y-%m") if sim.payoff_date else "N/A"
+                ),
+            }
+            for lid, sim in self.loans.items()
+        ]

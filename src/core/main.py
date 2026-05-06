@@ -8,10 +8,9 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from .calculations import freedom
 from .config import ConfigLoader
 from .loan_engine import User, UsersLoanProduct, Frequency
-from .simulation_engine import simulate
+from .simulation_engine import simulate, _simulation_to_dataframe
 
 _cfg = ConfigLoader()
 
@@ -33,6 +32,9 @@ with st.sidebar:
     if col_add.button("Add Loan"):
         st.session_state.loan_count += 1
     if col_rem.button("Remove") and st.session_state.loan_count > 1:
+        removed_idx = st.session_state.loan_count - 1
+        for _key in (f"id_{removed_idx}", f"bal_{removed_idx}", f"grad_{removed_idx}"):
+            st.session_state.pop(_key, None)
         st.session_state.loan_count -= 1
 
     loan_inputs = []
@@ -42,7 +44,7 @@ with st.sidebar:
         with st.expander(f"Loan #{i + 1}", expanded=True):
             l_id = st.selectbox(
                 "Plan Type",
-                options=["plan_1", "plan_2", "plan_3", "plan_4", "plan_5", "postgrad"],
+                options=["plan_1", "plan_2", "plan_3", "plan_4", "plan_5"],
                 key=f"id_{i}",
             )
             l_bal = st.number_input(
@@ -62,6 +64,11 @@ with st.sidebar:
     st.divider()
 
 if st.button("Run Full Simulation", type="primary"):
+
+    if sim_start_date is None:
+        st.error("Please set a simulation start date before running.")
+        st.stop()
+
     USER = User(user_name, annual_income=annual_income)
 
     try:
@@ -81,69 +88,74 @@ if st.button("Run Full Simulation", type="primary"):
             USER,
             start_date=sim_start_date,
             salary_growth=Decimal(str(salary_growth)),
-            to_df=True,
         )
 
         ############################
         #     Simulation stats     #
         ############################
-        paid_by_loan = result.groupby("loan_id")["repayment_applied"].sum().to_dict()
-        interest_by_loan = result.groupby("loan_id")["interest_accrued"].sum().to_dict()
-        freedom_stats = freedom(result)
-
         st.divider()
-
         st.subheader("Simulation Summary")
 
-        total_paid = sum(paid_by_loan.values())
-        total_interest = sum(interest_by_loan.values())
+        m_col1, m_col2, m_col3, m_col4 = st.columns(4)
+        m_col1.metric("Total Repayments", f"£{result.total_repaid:,.2f}")
+        m_col2.metric("Total Interest Added", f"£{result.total_interest_paid:,.2f}")
 
-        m_col1, m_col2, m_col3 = st.columns(3)
-        m_col1.metric("Total Repayments", f"£{total_paid:,.2f}")
-        m_col2.metric("Total Interest Added", f"£{total_interest:,.2f}")
-
-        # Calculate overall freedom (the date the last loan is cleared)
-        all_dates = [f["date"] for f in freedom_stats.values() if f["date"] is not None]
-        overall_freedom = max(all_dates).strftime("%b %Y") if all_dates else "Never"
+        # Overall freedom date logic
+        freedom_date = result.freedom_date
+        overall_freedom = freedom_date.strftime("%b %Y") if freedom_date else "Never"
         m_col3.metric("Debt Free Date", overall_freedom)
+
+        # New insight from the model expansion
+        m_col4.metric("Total Written Off", f"£{result.total_written_off:,.2f}")
 
         st.divider()
 
         st.write("### 🎓 Loan Specifics")
 
-        # Create a column for each loan to show its individual "fate"
-        loan_cols = st.columns(len(freedom_stats))
+        # Dynamically create columns for each loan in the result
+        loan_items = list(result.loans.items())
+        if not loan_items:
+            st.info("No loan data returned by the simulation.")
+        else:
+            loan_cols = st.columns(len(loan_items))
 
-        for i, (loan_id, info) in enumerate(freedom_stats.items()):
-            with loan_cols[i]:
-                # Style based on method
-                method_label = info["method"].replace("_", " ").title()
-                method_color = "green" if info["method"] == "paid_off" else "blue"
-                if info["method"] == "not_free":
-                    method_color = "red"
+            for i, (loan_id, sim) in enumerate(loan_items):
+                with loan_cols[i]:
+                    # 1. Determine Method (replaces the 'freedom' function logic)
+                    # If it has a payoff date and any entry was written off -> Written Off
+                    # Otherwise, if it has a payoff date -> Paid Off
+                    if sim.payoff_date:
+                        is_write_off = any(e.written_off for e in sim.ledger)
+                        method_label = "Written Off" if is_write_off else "Paid Off"
+                        method_color = "blue" if is_write_off else "green"
+                    else:
+                        method_label = "Not Free"
+                        method_color = "red"
 
-                st.markdown(f"**{loan_id.upper()}**")
+                    st.markdown(f"**{loan_id.upper()}**")
 
-                # Display status as a little "badge" using markdown
-                st.markdown(f":{method_color}[{method_label}]")
+                    # 2. Display status "badge"
+                    st.markdown(f":{method_color}[{method_label}]")
 
-                if info["date"]:
-                    st.caption(f"Cleared: {info['date'].strftime('%B %Y')}")
+                    # 3. Display Clear Date
+                    if sim.payoff_date:
+                        st.caption(f"Cleared: {sim.payoff_date.strftime('%B %Y')}")
 
-                # Show individual stats for this loan
-                loan_paid = paid_by_loan.get(loan_id, 0)
-                loan_int = interest_by_loan.get(loan_id, 0)
+                    # 4. Individual Stats (replaces groupby().to_dict() lookups)
+                    st.write(f"Paid: £{sim.total_repaid:,.2f}")
+                    st.write(f"Int: £{sim.total_interest_paid:,.2f}")
 
-                st.write(f"Paid: £{loan_paid:,.2f}")
-                st.write(f"Int: £{loan_int:,.2f}")
-
+                    # Optional: New detail on how much was forgiven
+                    if sim.written_off_amount > 0:
+                        st.write(f"Forgiven: £{sim.written_off_amount:,.2f}")
         st.divider()
 
         ####################
         #     Visuals      #
         ####################
+        chart_df = _simulation_to_dataframe(result)
         fig_mountain = px.area(
-            result,
+            chart_df,
             x="month",
             y="closing_balance",
             color="loan_id",
@@ -151,10 +163,10 @@ if st.button("Run Full Simulation", type="primary"):
             labels={"closing_balance": "Balance (£)", "month": "Year"},
             line_group="loan_id",
         )
-        st.plotly_chart(fig_mountain, width="stretch")
+        st.plotly_chart(fig_mountain, use_container_width=True)
 
         with st.expander("Show Monthly Raw Data"):
-            st.dataframe(result)
+            st.dataframe(_simulation_to_dataframe(result))
 
     except Exception as e:
         st.error(f"Error in configuration: {e}")
