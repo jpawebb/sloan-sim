@@ -100,7 +100,7 @@ def _simulation_to_dataframe(simulation: SimulationResult) -> pd.DataFrame:
 def simulate(
     user: User,
     start_date: date,
-    salary_growth: Decimal | List(Decimal) = Decimal(0),
+    salary_growth: Decimal | List[Decimal] = Decimal(0),
     to_df: bool = False,
 ) -> SimulationResult | pd.DataFrame:
     """Run a month-by-month simulation of the user's student loan repayments.
