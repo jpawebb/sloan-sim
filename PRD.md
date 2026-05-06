@@ -54,7 +54,6 @@ Unline HMRC's "find out how much you'll repay" tool -- which only reports the ne
 - **Plan 2**: Sliding scale between RPI (≤ lower threshold) and RPI + 3% (≥ upper threshold), capped by the Prevailing Market Rate (currently 6%).
 - **Plan 3 / Postgraduate**: `min(RPI + 3%, PMR cap)`.
 - **Plan 5**: `min(RPI, PMR cap)`
-- Unknown `loan_id` must raise `ValueError` (today it silently returns `None`).
 
 **FR-3. Repayment Calculation**. For each pay period, computethe borrower's repayment as: `max(0, (annual_income - plan_threshold) * plan_rate) / 12` if monthly where `plan_rate` is 9% (Plans 1, 2, 4, 5) or 6% (Postgraduate).
 
