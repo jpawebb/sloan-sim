@@ -75,7 +75,6 @@ def run():
         st.divider()
 
     if st.button("Run Full Simulation", type="primary"):
-
         if sim_start_date is None:
             st.error("Please set a simulation start date before running.")
             st.stop()
@@ -134,7 +133,6 @@ def run():
 
                 for i, (loan_id, sim) in enumerate(loan_items):
                     with loan_cols[i]:
-
                         if sim.payoff_date:
                             is_write_off = any(e.written_off for e in sim.ledger)
                             method_label = "Written Off" if is_write_off else "Paid Off"
