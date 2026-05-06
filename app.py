@@ -1,3 +1,5 @@
 """App entry point."""
 
-import src.core.main
+from src.core.main import run
+
+run()
