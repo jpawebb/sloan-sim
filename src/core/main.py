@@ -120,7 +120,9 @@ def run():
 
         user_name = st.text_input("Name", value="name")
         annual_income = st.number_input("Annual Income (£)", value=35_000, step=100)
-        salary_growth = st.slider("Annual Salary Growth (%)", 0.0, 10.0, 2.0) / 100
+        salary_growth = st.number_input(
+            "Annual Salary Growth (%)", value=2.0, step=0.01
+        )
         sim_start_date = st.date_input("Simulation Start Date", value=date.today())
 
         st.divider()
@@ -206,7 +208,7 @@ def run():
         result = simulate(
             USER,
             start_date=sim_start_date,
-            salary_growth=Decimal(str(salary_growth)),
+            salary_growth=Decimal(str(salary_growth)) / Decimal("100"),
         )
 
         # tabs
@@ -332,13 +334,13 @@ def run():
             )
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(gridcolor="#1e1e2e")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
         # raw data
         with tab_data:
             st.dataframe(
                 _simulation_to_dataframe(result),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 

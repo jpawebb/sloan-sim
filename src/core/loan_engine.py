@@ -4,6 +4,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import List
 from decimal import Decimal
+from datetime import date
 from .plans.base import Frequency
 
 
@@ -67,12 +68,16 @@ class UsersLoanProduct(LoanProduct):
         self.balance = balance
         self.years_since_graduation = years_since_graduation
 
-    @property
-    def effective_interest_rate(self) -> Decimal:
-        """Calculate the effective interest rate for this user's loan product."""
+    def get_effective_interest_rate(self, as_of: date) -> Decimal:
+        """Calculate the effective interest rate for this user's loan product on a specific date."""
         from .plans import get_plan
 
-        return get_plan(self.loan_id).effective_interest_rate(self.user)
+        return get_plan(self.loan_id).effective_interest_rate(self.user, as_of)
+
+    @property
+    def effective_interest_rate(self) -> Decimal:
+        """Legacy fallback property defaults to today's date context."""
+        return self.get_effective_interest_rate(date.today())
 
 
 class User:

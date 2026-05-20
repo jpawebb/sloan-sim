@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 from decimal import Decimal
 from enum import Enum
+from datetime import date
 
 if TYPE_CHECKING:
     from core.loan_engine import User
@@ -48,12 +49,10 @@ class LoanPlan(ABC):
 
     loan_id: str
     aliases: tuple[str, ...] = ()
-    earnings_threshold: Decimal
-    repayment_period: int
     default_interest_calculation_window: Frequency = Frequency.DAILY
     default_interest_application_window: Frequency = Frequency.MONTHLY
-    repayment_rate: Decimal
 
     @abstractmethod
-    def effective_interest_rate(self, user: User) -> Decimal:
+    def effective_interest_rate(self, user: User, as_of: date = None) -> Decimal:
         """Return the annualised effective rate for this borrower, today."""
+        pass
