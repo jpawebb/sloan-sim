@@ -121,7 +121,7 @@ def run():
         user_name = st.text_input("Name", value="name")
         annual_income = st.number_input("Annual Income (£)", value=35_000, step=100)
         salary_growth = st.slider("Annual Salary Growth (%)", 0.0, 10.0, 2.0) / 100
-        sim_start_date = st.date_input("Simulation Start Date", value=date(2026, 4, 1))
+        sim_start_date = st.date_input("Simulation Start Date", value=date.today())
 
         st.divider()
         st.header("Loans")
@@ -186,10 +186,6 @@ def run():
     # main content
     if not run_clicked:
         st.info("Configure your loans in the sidebar, then click **▶ Run Simulation**.")
-        st.stop()
-
-    if sim_start_date is None:
-        st.error("Please set a simulation start date before running.")
         st.stop()
 
     USER = User(user_name, annual_income=annual_income)
@@ -282,9 +278,7 @@ def run():
                                             if net_change > 0
                                             else f"-{delta_str}"
                                         ),
-                                        delta_color=(
-                                            "inverse" if net_change > 0 else "normal"
-                                        ),
+                                        delta_color="inverse",
                                     )
 
                             # duration and early payoff
