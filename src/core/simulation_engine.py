@@ -170,6 +170,10 @@ def simulate(
 
         days = _days_in_month(current_date)
 
+        # Sync the user's income property to match the active simulation year salary
+        # so that Plan 2 sliding scale logic interpolates correctly.
+        user.annual_income = salary
+
         # 1. Calculate interest for every active loan
         interest_this_month: Dict[str, Decimal] = {}
         for loan in user.loans:
@@ -180,7 +184,7 @@ def simulate(
                 continue
 
             # Apply interest according to the loan's effective annual rate for this month
-            annual_rate = get_plan(lid).effective_interest_rate(user)
+            annual_rate = loan.get_effective_interest_rate(as_of=current_date)
             interest_this_month[lid] = _monthly_interest(
                 balances[lid], annual_rate, days
             )

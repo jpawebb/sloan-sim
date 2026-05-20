@@ -208,7 +208,7 @@ def run():
         result = simulate(
             USER,
             start_date=sim_start_date,
-            salary_growth=Decimal(str(salary_growth)),
+            salary_growth=Decimal(str(salary_growth)) / Decimal("100"),
         )
 
         # tabs
@@ -334,13 +334,13 @@ def run():
             )
             fig.update_xaxes(showgrid=False)
             fig.update_yaxes(gridcolor="#1e1e2e")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
         # raw data
         with tab_data:
             st.dataframe(
                 _simulation_to_dataframe(result),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 

@@ -1,6 +1,7 @@
 """SLC Plan 3 implementation."""
 
 from decimal import Decimal
+from datetime import date
 
 from src.core.config import ConfigLoader
 from .base import LoanPlan
@@ -13,10 +14,13 @@ class Plan3(LoanPlan):
 
     loan_id = "plan_3"
     aliases = ("postgraduate",)
-    earnings_threshold = _cfg.earnings_threshold(loan_id)
-    repayment_rate = _cfg.repayment_rate(loan_id)
-    repayment_period = _cfg.repayment_period(loan_id)
 
-    def effective_interest_rate(self, user) -> Decimal:
+    def effective_interest_rate(self, user, as_of: date = None) -> Decimal:
         """Effective rate is the RPI + 3%, capped at the prevailing market rate cap."""
-        return min(_cfg.rpi() + Decimal(0.03), _cfg.prevailing_market_rate_cap())
+        if as_of == None:
+            as_of = date.today()
+
+        rpi = _cfg.rpi(as_of=as_of)
+        cap = _cfg.prevailing_market_rate_cap(as_of=as_of)
+
+        return min(rpi + Decimal(0.03), cap)
