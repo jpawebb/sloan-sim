@@ -120,7 +120,9 @@ def run():
 
         user_name = st.text_input("Name", value="name")
         annual_income = st.number_input("Annual Income (£)", value=35_000, step=100)
-        salary_growth = st.slider("Annual Salary Growth (%)", 0.0, 10.0, 2.0) / 100
+        salary_growth = st.number_input(
+            "Annual Salary Growth (%)", value=2.0, step=0.01
+        )
         sim_start_date = st.date_input("Simulation Start Date", value=date.today())
 
         st.divider()
